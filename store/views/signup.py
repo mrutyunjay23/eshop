@@ -1,46 +1,6 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.views import View
-from django.contrib.auth.hashers import make_password, check_password
-from .models import Product, Category, Customer
-# Create your views here.
-
-
-class Index(View):
-    def get(self, request):
-        context = {}
-        categories = Category.get_all_categories()
-        category_id = request.GET.get('category')       
-        if category_id:
-            products = Product.get_products_by_category_id(category_id)
-        else:
-            products = Product.get_all_products()
-        context['products'] = products
-        context['categories'] = categories
-        return render(request, 'index.html', context)
-    def post(self, request):
-        product = request.POST.get('product') 
-        cart = request.session.get('cart')
-        remove = request.POST.get('remove')
-        if cart:
-            quantity = cart.get(product)
-            if quantity:
-                if remove:
-                    if quantity <=1:
-                        cart.pop(product)
-                    else:
-                        cart[product] = quantity - 1
-                else:
-                    cart[product] = quantity + 1
-            else:
-                cart[product] = 1
-        else:
-            cart = {}
-            cart[product] = 1
-
-        request.session['cart'] = cart
-        print(cart)
-        return redirect('index')
+from django.contrib.auth.hashers import make_password
+from store.models import Customer
 
 def validate_user(customer):
         # validation
@@ -64,6 +24,7 @@ def validate_user(customer):
         elif customer.is_exist():
             error_message = "Email address already registered !"   
         return error_message 
+
 
 def register_user(request):
     context = {}
@@ -96,31 +57,11 @@ def register_user(request):
         customer.password = make_password(customer.password)
         customer.register()
         return redirect("index")
-        
+
+
 def signup(request):
     if request.method == "GET":
         return render(request, 'signup.html')
 
     else:
         return register_user(request)
-        
-class Login(View):
-    def get(self, request):
-        return render(request, 'login.html')
-    def post(self, request):
-        context = {}
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-
-        customer = Customer.get_customer_by_email(email)
-        if customer:
-            flag = check_password(password, customer.password)
-            if flag:
-                return redirect('index')
-            else:
-                error_message = "Invalid Password"
-        else:
-            error_message = "Invalid Email"
-
-        context['error_message'] = error_message
-        return render(request, 'login.html', context)

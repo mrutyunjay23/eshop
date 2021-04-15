@@ -36,6 +36,12 @@
                 <a class="nav-link active" aria-current="page" href="#">Store</a>
               </li>
             </ul>
+            {% if request.session.customer %}
+            <ul class="navbar-nav my-2 mb-lg-0">
+              <li class="nav-item d-flex">
+                <a class="nav-link active" aria-current="page" href="/logout">Logout</a>
+              </li>
+            {% else %}
             <ul class="navbar-nav my-2 mb-lg-0">
               <li class="nav-item d-flex">
                 <a class="nav-link active" aria-current="page" href="/login">Login</a>
@@ -44,6 +50,7 @@
                 <a class="nav-link active" aria-current="page" href="/signup">Signup</a>
               </li>
             </ul>
+            {% endif %}
               <!-- <li class="nav-item">
                 <a class="nav-link" href="#">Link</a>
               </li> -->
